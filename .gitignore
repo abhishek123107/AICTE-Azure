@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.env
+venv/
+.venv/
+.venv311/
+.env.local
+
+# Jupyter
+.ipynb_checkpoints
+
+# Virtual environments
+venv/
+ENV/
+
+# macOS
+.DS_Store
+
+# Node
+node_modules/
+/frontend/node_modules/
+frontend/node_modules/
+/dist/
+/frontend/dist/
+
+# Models, dataset and large files
+models/*.h5
+models/face_detector/
+plots/
+dataset/
+
+# Logs
+*.log
+
+# IDEs
+.vscode/
+.idea/
+
+# npm
+package-lock.json
+
+# Misc
+*.sqlite3
