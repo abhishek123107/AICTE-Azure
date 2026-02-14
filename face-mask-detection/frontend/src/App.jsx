@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect } from "react";
-import Webcam from "react-webcam";
-import { io } from "socket.io-client";
+import React, { useState, useRef, useEffect } from 'react';
+import Webcam from 'react-webcam';
+import { io } from 'socket.io-client';
 
-const API_URL = "http://localhost:5000/predict";
-const SOCKET_URL = "http://localhost:5000";
+const API_URL = 'http://localhost:5000/predict';
+const SOCKET_URL = 'http://localhost:5000';
 
 export default function App() {
   const [file, setFile] = useState(null);
@@ -16,7 +16,7 @@ export default function App() {
   const [useWebcam, setUseWebcam] = useState(false);
   const [autoCapture, setAutoCapture] = useState(false);
   const [useSocket, setUseSocket] = useState(false);
-  const [cameraStatus, setCameraStatus] = useState("idle"); // idle | checking | ready | denied | no-device | unsupported | error
+  const [cameraStatus, setCameraStatus] = useState('idle'); // idle | checking | ready | denied | no-device | unsupported | error
 
   const webcamRef = useRef(null);
   const autoIntervalRef = useRef(null);
@@ -25,22 +25,18 @@ export default function App() {
   useEffect(() => {
     if (useSocket && !socketRef.current) {
       socketRef.current = io(SOCKET_URL);
-      socketRef.current.on("connect", () =>
-        console.log("Socket connected", socketRef.current.id),
-      );
-      socketRef.current.on("prediction", (data) => {
+      socketRef.current.on('connect', () => console.log('Socket connected', socketRef.current.id));
+      socketRef.current.on('prediction', (data) => {
         setLoading(false);
         if (data.error) setError(data.error);
         else {
-          setResult(
-            data.detections && data.detections[0] ? data.detections[0] : null,
-          );
+          setResult(data.detections && data.detections[0] ? data.detections[0] : null);
           setBoxes(data.detections || []);
           if (data.image_size) setImageSize(data.image_size);
         }
       });
-      socketRef.current.on("connect_error", (err) =>
-        setError("Socket connect error: " + err.message),
+      socketRef.current.on('connect_error', (err) =>
+        setError('Socket connect error: ' + err.message)
       );
     }
     return () => {
@@ -64,12 +60,12 @@ export default function App() {
   useEffect(() => {
     let cancelled = false;
     async function checkCamera() {
-      setCameraStatus("checking");
+      setCameraStatus('checking');
       setError(null);
 
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        setCameraStatus("unsupported");
-        setError("Camera not supported in this browser.");
+        setCameraStatus('unsupported');
+        setError('Camera not supported in this browser.');
         return;
       }
 
@@ -80,29 +76,26 @@ export default function App() {
         // stop immediately — we only check permission/device
         stream.getTracks().forEach((t) => t.stop());
         if (!cancelled) {
-          setCameraStatus("ready");
+          setCameraStatus('ready');
           setError(null);
         }
       } catch (err) {
-        if (err.name === "NotAllowedError" || err.name === "SecurityError") {
-          setCameraStatus("denied");
-          setError("Camera access denied. Allow camera in your browser.");
-        } else if (
-          err.name === "NotFoundError" ||
-          err.name === "OverconstrainedError"
-        ) {
-          setCameraStatus("no-device");
-          setError("No camera device found.");
+        if (err.name === 'NotAllowedError' || err.name === 'SecurityError') {
+          setCameraStatus('denied');
+          setError('Camera access denied. Allow camera in your browser.');
+        } else if (err.name === 'NotFoundError' || err.name === 'OverconstrainedError') {
+          setCameraStatus('no-device');
+          setError('No camera device found.');
         } else {
-          setCameraStatus("error");
-          setError("Camera error: " + err.message);
+          setCameraStatus('error');
+          setError('Camera error: ' + err.message);
         }
       }
     }
 
     if (useWebcam) checkCamera();
     else {
-      setCameraStatus("idle");
+      setCameraStatus('idle');
       setError(null);
     }
 
@@ -125,7 +118,7 @@ export default function App() {
 
       const reader = new FileReader();
       reader.onload = () => {
-        socketRef.current.emit("frame", { image: reader.result });
+        socketRef.current.emit('frame', { image: reader.result });
       };
       reader.readAsDataURL(fileBlob);
       return;
@@ -136,16 +129,14 @@ export default function App() {
     setResult(null);
 
     const fd = new FormData();
-    fd.append("image", fileBlob, "upload.jpg");
+    fd.append('image', fileBlob, 'upload.jpg');
 
     try {
-      const res = await fetch(API_URL, { method: "POST", body: fd });
+      const res = await fetch(API_URL, { method: 'POST', body: fd });
       if (!res.ok) throw new Error(await res.text());
       const json = await res.json();
       // server now returns detections array + image_size
-      setResult(
-        json.detections && json.detections[0] ? json.detections[0] : null,
-      );
+      setResult(json.detections && json.detections[0] ? json.detections[0] : null);
       setBoxes(json.detections || []);
       if (json.image_size) setImageSize(json.image_size);
     } catch (err) {
@@ -164,7 +155,7 @@ export default function App() {
       setLoading(true);
       setError(null);
       setResult(null);
-      socketRef.current.emit("frame", { image: screenshot });
+      socketRef.current.emit('frame', { image: screenshot });
       return;
     }
 
@@ -174,7 +165,7 @@ export default function App() {
       const blob = await res.blob();
       await predictFile(blob);
     } catch (err) {
-      setError("Failed to capture/send frame: " + err.message);
+      setError('Failed to capture/send frame: ' + err.message);
     } finally {
       // draw boxes cleared when no detections
       // boxes will be populated by predictFile result
@@ -183,32 +174,45 @@ export default function App() {
 
   return (
     <div className="container">
-      <h1>Face Mask Detector</h1>
+      <header className="hero">
+        <h1>Face Mask Detector</h1>
+      </header>
 
-      <div className="card" style={{ flexDirection: "column", gap: 12 }}>
-        <form
-          onSubmit={submitFile}
-          style={{ display: "flex", gap: 12, width: "100%" }}
+      {result && (
+        <div
+          className={`prediction-badge ${result.label === 'Mask' ? 'mask' : 'no-mask'}`}
+          role="status"
+          aria-live="polite"
         >
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-          />
-          <button type="submit" disabled={!file || loading}>
-            {loading ? "Predicting..." : "Predict"}
+          <div className="badge-inner">
+            <div className="badge-label">{result.label}</div>
+            <div className="badge-confidence">{(result.confidence * 100).toFixed(0)}%</div>
+          </div>
+        </div>
+      )}
+
+      <div className="card controls-card">
+        <form onSubmit={submitFile} className="file-form">
+          <div className="file-input-wrapper">
+            <label className="file-choose">
+              Choose file
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              />
+            </label>
+            <div className="file-name">{file ? file.name : 'No file chosen'}</div>
+          </div>
+
+          <button className="predict-btn" type="submit" disabled={!file || loading}>
+            {loading ? 'Predicting...' : 'Predict'}
           </button>
         </form>
 
-        <div
-          style={{
-            display: "flex",
-            gap: 12,
-            alignItems: "center",
-            marginTop: 8,
-          }}
-        >
+        <div className="controls-row">
           <button
+            className="camera-btn"
             onClick={() => {
               setUseWebcam((v) => {
                 const nv = !v;
@@ -216,95 +220,97 @@ export default function App() {
                 return nv;
               });
             }}
+            aria-pressed={useWebcam}
           >
-            {useWebcam ? "Stop Webcam" : "Start Webcam"}
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden
+            >
+              <path
+                d="M3 7h3l2-2h6l2 2h3v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"
+                stroke="#042027"
+                strokeWidth="1"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <circle cx="12" cy="13" r="3.5" stroke="#042027" strokeWidth="1" />
+            </svg>
+            {useWebcam ? 'Stop Webcam' : 'Start Webcam'}
           </button>
 
-          <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <label className="checkbox-inline">
             <input
               type="checkbox"
               checked={autoCapture}
               onChange={(e) => setAutoCapture(e.target.checked)}
               disabled={!useWebcam}
             />
-            Auto-capture (1s)
+            <span>Auto-capture (1s)</span>
           </label>
 
-          <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <label className="checkbox-inline">
             <input
               type="checkbox"
               checked={useSocket}
               onChange={(e) => setUseSocket(e.target.checked)}
             />
-            Use WebSocket
+            <span>Use WebSocket</span>
           </label>
 
           {useWebcam && (
             <button
+              className="ghost-btn"
               onClick={captureAndSend}
-              disabled={loading || cameraStatus !== "ready"}
+              disabled={loading || cameraStatus !== 'ready'}
             >
               Capture & Predict
             </button>
           )}
 
-          <div style={{ marginLeft: 8 }}>
-            {cameraStatus === "checking" && <small>Checking camera…</small>}
-            {cameraStatus === "ready" && (
-              <small style={{ color: "#5eead4" }}>Camera ready</small>
+          <div className="camera-status">
+            {cameraStatus === 'checking' && <small>Checking camera…</small>}
+            {cameraStatus === 'ready' && <small className="ok">Camera ready</small>}
+            {cameraStatus === 'denied' && (
+              <small className="bad">Permission denied — allow camera</small>
             )}
-            {cameraStatus === "denied" && (
-              <small style={{ color: "#f87171" }}>
-                Permission denied — allow camera
-              </small>
+            {cameraStatus === 'no-device' && <small className="warn">No camera found</small>}
+            {cameraStatus === 'unsupported' && (
+              <small className="warn">Browser does not support camera</small>
             )}
-            {cameraStatus === "no-device" && (
-              <small style={{ color: "#f97316" }}>No camera found</small>
-            )}
-            {cameraStatus === "unsupported" && (
-              <small style={{ color: "#f97316" }}>
-                Browser does not support camera
-              </small>
-            )}
-            {cameraStatus === "error" && (
-              <small style={{ color: "#f97316" }}>Camera error</small>
-            )}
+            {cameraStatus === 'error' && <small className="bad">Camera error</small>}
           </div>
         </div>
       </div>
 
       {useWebcam && (
-        <div
-          className="card"
-          style={{
-            marginTop: 12,
-            justifyContent: "center",
-            position: "relative",
-          }}
-        >
+        <div className="card webcam-card">
           <Webcam
             audio={false}
             ref={webcamRef}
             onUserMedia={() => {
-              setCameraStatus("ready");
+              setCameraStatus('ready');
               setError(null);
               setAutoCapture(true); // start auto-detection when webcam is ready
             }}
             onUserMediaError={(e) => {
-              setCameraStatus("error");
-              setError("Webcam error: " + (e?.message || e));
+              setCameraStatus('error');
+              setError('Webcam error: ' + (e?.message || e));
             }}
             screenshotFormat="image/jpeg"
             width={360}
-            videoConstraints={{ width: 360, height: 288, facingMode: "user" }}
+            videoConstraints={{ width: 360, height: 288, facingMode: 'user' }}
           />
 
           {/* overlay: draw boxes using percentages relative to returned image_size */}
           <div
             style={{
-              position: "absolute",
-              left: "50%",
-              transform: "translateX(-50%)",
+              position: 'absolute',
+              left: '50%',
+              transform: 'translateX(-50%)',
               top: 8,
               width: 360,
               height: 288,
@@ -317,28 +323,27 @@ export default function App() {
               const wPct = (b.box[2] / imgW) * 100;
               const hPct = (b.box[3] / imgH) * 100;
               const style = {
-                position: "absolute",
-                left: leftPct + "%",
-                top: topPct + "%",
-                width: wPct + "%",
-                height: hPct + "%",
-                border:
-                  "2px solid " + (b.label === "Mask" ? "#34d399" : "#fb7185"),
-                boxSizing: "border-box",
-                pointerEvents: "none",
+                position: 'absolute',
+                left: leftPct + '%',
+                top: topPct + '%',
+                width: wPct + '%',
+                height: hPct + '%',
+                border: '2px solid ' + (b.label === 'Mask' ? '#34d399' : '#fb7185'),
+                boxSizing: 'border-box',
+                pointerEvents: 'none',
               };
               return (
                 <div key={i} style={style}>
                   <div
                     style={{
-                      background: "rgba(0,0,0,0.6)",
-                      color: "#fff",
+                      background: 'rgba(0,0,0,0.6)',
+                      color: '#fff',
                       fontSize: 12,
-                      padding: "2px 6px",
+                      padding: '2px 6px',
                       borderRadius: 4,
-                      position: "absolute",
+                      position: 'absolute',
                       left: 0,
-                      top: "-22px",
+                      top: '-22px',
                     }}
                   >
                     {b.label} ({(b.confidence * 100).toFixed(0)}%)

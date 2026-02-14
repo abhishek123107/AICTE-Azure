@@ -1,56 +1,235 @@
 :root {
-  --bg: #0f1724;
-  --card: #0b1220;
-  --accent: #06b6d4;
-  --muted: #94a3b8;
+  --bg: #071029;
+  --card: rgba(255, 255, 255, 0.03);
+  --accent: #48d1ff;
+  --accent-2: #22c1c3;
+  --muted: #9fb6c4;
   --success: #16a34a;
   --danger: #ef4444;
+  --card-border: rgba(68, 212, 255, 0.12);
 }
 * {
   box-sizing: border-box;
-  font-family:
-    Inter,
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    "Segoe UI",
-    Roboto,
-    "Helvetica Neue",
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue',
     Arial;
 }
 body {
   margin: 0;
-  background: linear-gradient(180deg, #071029 0%, #00121a 100%);
-  color: #e6eef6;
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 32px;
+  padding: 48px;
+  color: #e6eef6;
+  background-color: var(--bg);
+  /* starry / lens-flare background approximation */
+  background-image: radial-gradient(
+      ellipse at 20% 10%,
+      rgba(34, 193, 195, 0.06) 0%,
+      transparent 18%
+    ),
+    radial-gradient(ellipse at 80% 80%, rgba(72, 209, 255, 0.04) 0%, transparent 20%),
+    radial-gradient(closest-side at 50% 40%, rgba(8, 23, 48, 0.6), rgba(2, 10, 18, 0.9));
+  background-blend-mode: overlay, overlay, normal;
 }
 .container {
   width: 100%;
-  max-width: 760px;
+  max-width: 960px;
+}
+.hero {
+  text-align: center;
+  margin-bottom: 18px;
+}
+.hero h1 {
+  font-size: 40px;
+  letter-spacing: -0.02em;
+  margin: 0 0 8px 0;
+  color: #f8fbff;
+  text-shadow: 0 6px 30px rgba(0, 80, 120, 0.25);
+}
+
+.prediction-badge {
+  margin: 12px auto 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  box-shadow: 0 10px 30px rgba(2, 8, 20, 0.6);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.02), rgba(72, 209, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  width: fit-content;
+  min-width: 220px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #e6fbff;
+  backdrop-filter: blur(6px);
+  animation: pop 220ms cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+.prediction-badge.mask {
+  border-color: rgba(52, 211, 153, 0.22);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.06), rgba(16, 185, 129, 0.02));
+  color: #9ef0c9;
+}
+.prediction-badge.no-mask {
+  border-color: rgba(251, 113, 133, 0.22);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.04), rgba(239, 68, 68, 0.01));
+  color: #ffc4c9;
+}
+.badge-inner {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.badge-label {
+  font-size: 18px;
+  text-transform: uppercase;
+}
+.badge-confidence {
+  font-size: 14px;
+  opacity: 0.95;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+}
+@keyframes pop {
+  from {
+    transform: translateY(-6px) scale(0.98);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
 }
 .card {
-  background: rgba(255, 255, 255, 0.02);
-  padding: 18px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  padding: 20px;
+  border-radius: 18px;
+  border: 1px solid var(--card-border);
   display: flex;
   gap: 12px;
   align-items: center;
+  box-shadow: 0 8px 30px rgba(2, 8, 20, 0.6);
 }
-input[type="file"] {
-  flex: 1;
+.controls-card {
+  flex-direction: column;
+  gap: 14px;
+  padding: 22px;
+  position: relative;
+  overflow: visible;
 }
-button {
-  background: var(--accent);
-  border: none;
+.file-form {
+  display: flex;
+  gap: 14px;
+  width: 100%;
+  align-items: center;
+}
+.file-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  flex: 1 1 auto;
+}
+.file-choose {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  padding: 6px 12px;
+  border-radius: 10px;
   color: #042027;
-  padding: 10px 14px;
-  border-radius: 8px;
+  font-weight: 600;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+}
+.file-choose input[type='file'] {
+  display: none;
+}
+.file-name {
+  color: var(--muted);
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.predict-btn {
+  background: linear-gradient(180deg, #59e7ff, #22c1c3);
+  color: #042027;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 14px;
+  box-shadow: 0 8px 30px rgba(34, 193, 195, 0.12), inset 0 -2px 6px rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  font-weight: 700;
+}
+.controls-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+}
+.camera-btn {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  background: linear-gradient(135deg, rgba(72, 209, 255, 0.14), rgba(34, 193, 195, 0.08));
+  border: 1px solid rgba(68, 212, 255, 0.12);
+  padding: 10px 14px;
+  border-radius: 999px;
+  color: #bfeff3;
+  backdrop-filter: blur(4px);
+  cursor: pointer;
+  font-weight: 600;
+}
+.camera-btn svg path,
+.camera-btn svg circle {
+  fill: #a8f3ff;
+  stroke: #042027;
+}
+.checkbox-inline {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--muted);
+  font-size: 14px;
+}
+.checkbox-inline input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  accent-color: #48d1ff;
+}
+.ghost-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.camera-status small.ok {
+  color: #5eead4;
+}
+.camera-status small.warn {
+  color: #f97316;
+}
+.camera-status small.bad {
+  color: #f87171;
+}
+.webcam-card {
+  margin-top: 14px;
+  justify-content: center;
+  position: relative;
+  padding: 12px;
+  border-radius: 12px;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 .result {
   margin-top: 16px;
@@ -66,9 +245,6 @@ button {
   border-radius: 6px;
   color: #9bd3e0;
   overflow: auto;
-}
-h1 {
-  margin: 0 0 12px 0;
 }
 footer {
   margin-top: 18px;
